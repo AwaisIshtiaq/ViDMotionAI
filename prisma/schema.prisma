@@ -1,0 +1,57 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String    @id @default(cuid())
+  clerkId   String?   @unique
+  email     String    @unique
+  name      String?
+  password  String?
+  credits   Int       @default(100)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  projects  Project[]
+}
+
+model Project {
+  id              String           @id @default(cuid())
+  title           String
+  prompt          String
+  duration        String
+  aspectRatio     String
+  status          String           @default("pending")
+  videoUrl        String?
+  thumbnailUrl    String?
+  generatedPrompt String?          @db.Text
+  themeConfig     Json?
+  remotionCode    String?          @db.Text
+  processingStatus String          @default("idle")
+  currentStep     Int              @default(0)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  userId          String
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  generatedVideos GeneratedVideo[]
+}
+
+model GeneratedVideo {
+  id           String   @id @default(cuid())
+  title        String
+  url          String?
+  thumbnailUrl String?
+  model        String   @default("default")
+  quality      String   @default("standard")
+  prompt       String   @default("")
+  duration     String   @default("10s")
+  aspectRatio  String   @default("16:9")
+  status       String   @default("pending")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  projectId    String
+  project      Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
